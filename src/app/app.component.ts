@@ -24,50 +24,75 @@ export class AppComponent implements AfterViewInit {
     // and the root stage PIXI.Container.
     this.app = new PIXI.Application({
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
+      antialias: true
     });
 
     // The application will create a canvas element for you that you
     // can then insert into the DOM.
     this.pixiScene.nativeElement.appendChild(this.app.view);
 
-    // load the texture we need
-    // PIXI.loader.add('bunny', '../assets/bunnys.png').load( (loader, resources) => {
+    var blurFilter1 = new PIXI.filters.BlurFilter();
+    blurFilter1.blur = 10;
+    var colorFilter = new PIXI.filters.ColorMatrixFilter();
+    colorFilter.blackAndWhite();
 
-    //     // This creates a texture from a 'bunny.png' image.
-    //     let bunny = new PIXI.Sprite(resources.bunny.texture);
+    var graphics = new PIXI.Graphics();
+    // set a fill and a line style again and draw a rectangle
+    graphics.beginFill(0xFFFFFF, 1);
+    graphics.drawRect(this.app.renderer.width / 2 - 310, this.app.renderer.height / 2 + 40, 620, 320);
+    graphics.lineStyle(0);
 
-    //     // Setup the position of the bunny
-    //     bunny.x = this.app.renderer.width / 2;
-    //     bunny.y = this.app.renderer.height / 2;
+    // graphics.filters = [blurFilter1];
 
-    //     // Rotate around the center
-    //     bunny.anchor.x = 0.5;
-    //     bunny.anchor.y = 0.5;
+    graphics.zOrder = 1;
 
-    //     // Add the bunny to the scene we are building.
-    //     this.app.stage.addChild(bunny);
 
-    //     // Listen for frame updates
-    //     this.app.ticker.add(() => {
-    //         // each frame we spin the bunny around a bit
-    //         bunny.rotation += 0.01;
-    //     });
-    // });
+    PIXI.loader.add('candeo_bg', '../assets/candeo_vid.mp4').load( (loader, resources) => {
 
-    PIXI.loader.add('candeo_bg', '../assets/candeo-bg.jpg').load( (loader, resources) => {
+        console.log('loaded');
 
-        let candeo_bg = new PIXI.Sprite(resources.candeo_bg.texture);
+        let texture = PIXI.Texture.fromVideo('../assets/candeo_vid.mp4');
 
-        // Setup the position of the bunny
-        candeo_bg.x = this.app.renderer.width / 2;
-        candeo_bg.y = this.app.renderer.height / 2;
+        let candeo_bg = new PIXI.Sprite(texture);
 
-        // Rotate around the center
-        candeo_bg.anchor.x = 0.5;
-        candeo_bg.anchor.y = 0.5;
+        candeo_bg.width = this.app.renderer.width;
+        candeo_bg.height = this.app.renderer.height;
 
         this.app.stage.addChild(candeo_bg);
+
+        let blurred = new PIXI.Sprite(texture);
+
+        blurred.width = this.app.renderer.width;
+        blurred.height = this.app.renderer.height;
+
+        blurred.mask = graphics;
+        blurred.filters = [blurFilter1, colorFilter];
+        this.app.stage.addChild(blurred);
+        this.app.stage.addChild(graphics);
+
+        var style = new PIXI.TextStyle({
+          fontFamily: 'Arial',
+          fontSize: 36,
+          fill: "#fff",
+          fontWeight: 'bold',
+          wordWrap: true,
+          wordWrapWidth: 440
+      });
+
+      var richText = new PIXI.Text('Candeo Creative', style);
+      richText.x = 30;
+      richText.y = 180;
+
+      this.app.stage.addChild(richText);
+    });
+
+
+    var count = 0;
+    // listen for frame updates
+    this.app.ticker.add( () => {
+      // count += 0.005;
+      // blurFilter1.blur = 20 * (Math.cos(count));
     });
   }
 
