@@ -1,0 +1,42 @@
+.app-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+
+    #pixi-scene {
+        position: absolute;
+        z-index: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        overflow: hidden;
+    }
+
+    & > *:not(#pixi-scene) {
+        position: relative;
+        z-index: 1;
+        color: #fff;
+    }
+
+    gsap-text.candeo {
+        font-size: 40px;
+        position: absolute !important;
+        top: 62vh;
+        letter-spacing: 6px;
+        font-family: Arial;
+        font-weight: bold;
+        width: 100%;
+        text-align: center;
+    }
+    gsap-text.creative {
+        font-size: 27px;
+        position: absolute !important;
+        top: 71vh;
+        letter-spacing: 6px;
+        font-family: Arial;
+        font-weight: lighter;
+        width: 100%;
+        text-align: center;
+    }
+}
