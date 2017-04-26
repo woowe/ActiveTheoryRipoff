@@ -3,6 +3,18 @@ import { Component, NgZone, AfterViewInit, ViewChild, ElementRef, HostListener }
 import * as PIXI from 'pixi.js';
 import * as Filters from 'pixi-filters';
 
+interface PathPointOpts {
+  stroke?: number;
+  lerp?: boolean;
+  strokeLerp?: boolean;
+}
+
+interface PathPoint {
+  x: number;
+  y: number;
+  opts?: PathPointOpts;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -45,7 +57,7 @@ export class AppComponent implements AfterViewInit {
     var pmouseX = 0;
     var pmouseY = 0;
 
-    var number_of_particles = this.app.renderer instanceof PIXI.WebGLRenderer ? 2500 : 100;
+    var number_of_particles = this.app.renderer instanceof PIXI.WebGLRenderer ? 7000 : 100;
     var particlesContainer = new PIXI.particles.ParticleContainer(number_of_particles, {
       scale: true,
       position: true,
@@ -66,7 +78,7 @@ export class AppComponent implements AfterViewInit {
       mouseY = event.data.global.y;
     });
 
-    blurFilter1.blur = 3;
+    blurFilter1.blur = 1;
     container.filters = [...pixi_filters, filter, blurFilter1];
     container.filterArea = new PIXI.Rectangle(0, 0, this.app.renderer.width, this.app.renderer.height);
     
@@ -80,13 +92,17 @@ export class AppComponent implements AfterViewInit {
       var x = Math.random() * this.app.renderer.width;
       var y = Math.random() * this.app.renderer.height;
 
-      var side1 = Math.random() * 20 + 15;
-      var side2 = Math.random() * 20 + 15;
-      var varX = Math.random() * 25;
-      var varY = Math.random() * 25;
+      // var side1 = Math.max(10, Math.random() * 20);
+      // var side2 = Math.max(10, Math.random() * 20);
+      // var varX = Math.random() * 15;
+      // var varY = Math.random() * 15;
+      var side1 = 7;
+      var side2 = 10.5;
+      var varX = 5;
+      var varY = -5;
 
       var graphics = new PIXI.Graphics();
-      graphics.beginFill(0xffffff, 0.5);
+      graphics.beginFill(0xffffff);
       graphics.moveTo(x, y);
       graphics.lineTo(x - varX, y + side1);
       graphics.lineTo(x + side2 + varX, y + side1 - varY);
@@ -110,14 +126,52 @@ export class AppComponent implements AfterViewInit {
 
     console.log(points.length, particlesContainer.filters);
 
+    // D
+    var path: PathPoint[] = [
+      {x: -125, y: -175},
+      {x: -125, y: 175},
+      {x: 62.5, y: 175},
+      {x: 125, y: 87.5},
+      {x: 125, y: -87.5},
+      {x: 62.5, y: -175},
+      {x: -125, y: -175}
+    ];
+
+    // var path: PathPoint[] = [
+    //   // center point
+    //   {x: 0, y: 0, opts: {stroke: 55, lerp: false}},
+    //   // top tendril
+    //   {x: 0, y: -275, opts: {stroke: 20, strokeLerp: true}},
+    //   {x: -65, y: -175, opts: {stroke: 50, strokeLerp: true}},
+    //   {x: -55, y: -125, opts: {stroke: 20, strokeLerp: true}}
+    // ];
+
+    
+
     var calcPoints;
     var tick = 0;
-    var movingPoint = [this.app.renderer.width / 2, this.app.renderer.height / 2];
-    this.app.ticker.add((delta) => {
-      movingPoint[0] = Math.cos(tick * 2) * 400 + this.app.renderer.width / 2 - 35;
-      movingPoint[1] = Math.sin(tick * 2) * 400 + this.app.renderer.height / 2;
+    var movingPoint = {
+      x: this.app.renderer.width / 2,
+      y: this.app.renderer.height / 2,
+      stroke: 0
+    };
 
+    var updateFollow = this.followPath(movingPoint, this.scalePath(path, 1, 1), 1000);
+
+    var pathUpdate = updateFollow(0);
+
+    this.app.ticker.add((delta) => {
+      tick += 0.01;
+      // movingPoint.x = Math.cos(tick * 2) * 400 + this.app.renderer.width / 2 - 35;
+      // movingPoint.y = Math.sin(tick * 2) * 400 + this.app.renderer.height / 2;
       calcPoints = points.slice(0);
+
+      if(pathUpdate) {
+        movingPoint.x = pathUpdate.x + this.app.renderer.width / 2 - 35;
+        movingPoint.y = pathUpdate.y + this.app.renderer.height / 2;
+        movingPoint.stroke = pathUpdate.stroke;
+        pathUpdate = updateFollow(tick/2);
+      }
 
       for(var i = 0; i < number_of_particles; ++i) {
         var x = particles[i].x;
@@ -129,8 +183,8 @@ export class AppComponent implements AfterViewInit {
         };
 
         var posRelativeToPoint = {
-          x: x - movingPoint[0],
-          y: y - movingPoint[1]
+          x: x - movingPoint.x,
+          y: y - movingPoint.y
         };
 
         var distance = Math.sqrt(
@@ -154,11 +208,13 @@ export class AppComponent implements AfterViewInit {
         };
 
         // distance past which the force is zero
-        var maxDistance = 35;
+        var maxDistance = 20;
         var force = (maxDistance - (distance)) / maxDistance;
 
         // if we went below zero, set it to zero.
         if (force < 0) force = 0;
+
+        var maxDistance = movingPoint.stroke;
 
         var pforce = (maxDistance - (pdistance)) / maxDistance;
 
@@ -189,7 +245,6 @@ export class AppComponent implements AfterViewInit {
         matrix[5] = Math.sin(tick / 2);
         matrix[6] = Math.sin(tick / 4);
       }
-      tick += 0.01;
     });
 
     
@@ -207,26 +262,113 @@ export class AppComponent implements AfterViewInit {
     return Math.sqrt( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
   }
 
-  followPath(point: {x: number, y: number}, path: {x: number, y: number}[], duration: number) {
-    var time = 0;
-    var parts = Array(path.length).fill(duration / (path.length - 1));
+  lerp(a, b, f) {
+    if(a === b) {
+      return a;
+    }
+    return (a * (1.0 - f)) + (b * f);
+  }
 
-    var distances = Array(path.length-1).fill(0);
+  scalePath(path: PathPoint[], scaleX: number = 1, scaleY: number = 1) {
+    for(var i = 0; i < path.length; ++i) {
+      path[i].x *= scaleX;
+      path[i].y *= scaleY;
+    }
+
+    return path;
+  }
+
+  followPath(point, path: PathPoint[], duration: number, close: boolean = false) {
+    var default_ops: PathPointOpts = {
+      stroke: 20,
+      lerp: true,
+      strokeLerp: false
+    };
+
+    path = path.map(point => {
+      if(point.opts) {
+        point.opts = { ...default_ops, ...point.opts }
+      } else {
+        point.opts = default_ops
+      }
+      return point;
+    });
+
+    var lengthSub = close || path.length === 1 ? 0 : 1;
+    var time = 0;
+    var parts = Array(path.length - lengthSub).fill(0);
+
+    var distances = Array(path.length - lengthSub).fill(0);
     var total_distance = 0;
 
     var p_dist = (path1, path2) => this.dist(path1.x, path1.y, path2.x, path2.y);
 
-    for(var i = 0; i < path.length - 1; ++i) {
-      var dist = p_dist(path[i], path[i+1]);
+    for(var i = 0; i < path.length - lengthSub; ++i) {
+      var nidx = i + 1;
+      if(i === path.length - 1) {
+        nidx = 0;
+      }
+
+      var dist = p_dist(path[i], path[nidx]);
       distances[i] = dist;
       total_distance += dist;
     }
 
-    parts = parts.map((part, index) => part * (distances[index] / total_distance));
-    return parts;
-    // return (delta) => {
+    parts = distances.map((distance, index) => ({
+      duration: duration / total_distance * distance,
+      when: distances.slice(0, index).map((distance) => duration / total_distance * distance).reduce((a, b) => a + b, 0)
+    }));
 
-    //   time += delta;
-    // };
+    console.log("DISTANCES", distances);
+    console.log("PARTS", parts);
+    return (delta) => {
+      
+      if(time > duration) {
+        console.log('Done following path...');
+        var idx = close || path.length === 1  ? 0 : path.length-1;
+        return {x: path[idx].x, y: path[idx].y, stroke: path[idx].opts.stroke};
+      }
+
+      time += delta;
+
+      var idx = -1;
+
+      for(var i = 0; i < parts.length; ++i) {
+        if(time >= parts[i].when) {
+          idx = i;
+        }
+      }
+
+      if(idx === -1) {
+        console.log("couldn't find index");
+        return;
+      }
+
+      var relTime = time - parts[idx].when;
+      var percentDur = relTime / parts[idx].duration;
+
+      var nidx = idx + 1;
+      if(idx === path.length - 1) {
+        nidx = 0;
+      }
+
+      var dx = path[idx].x;
+      var dy = path[idx].y;
+      if(path[idx].opts.lerp) {
+        dx = this.lerp(path[idx].x, path[nidx].x, percentDur);
+        dy = this.lerp(path[idx].y, path[nidx].y, percentDur);
+      }
+
+      var stroke = path[idx].opts.stroke;
+      if(path[idx].opts.strokeLerp){
+        stroke = this.lerp(path[idx].opts.stroke, path[nidx].opts.stroke, percentDur);
+      }
+
+      return { 
+        x: dx,
+        y: dy,
+        stroke
+      };
+    };
   }
 }

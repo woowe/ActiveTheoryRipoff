@@ -21,7 +21,9 @@
     "@angular/platform-browser-dynamic": "^4.0.0",
     "@angular/router": "^4.0.0",
     "core-js": "^2.4.1",
+    "gsap": "^1.19.1",
     "p5": "^0.5.8",
+    "pixi-filters": "^1.0.6",
     "pixi.js": "^4.5.0",
     "rxjs": "^5.1.0",
     "zone.js": "^0.8.4"
