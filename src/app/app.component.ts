@@ -128,13 +128,25 @@ export class AppComponent implements AfterViewInit {
 
     // D
     var path: PathPoint[] = [
-      {x: -125, y: -175},
-      {x: -125, y: 175},
-      {x: 62.5, y: 175},
-      {x: 125, y: 87.5},
-      {x: 125, y: -87.5},
-      {x: 62.5, y: -175},
-      {x: -125, y: -175}
+      {x: -125, y: -175, opts: {stroke: 40}},
+      {x: -125, y: 175, opts: {stroke: 40}},
+      {x: 62.5, y: 175, opts: {stroke: 40}},
+      {x: 125, y: 87.5, opts: {stroke: 40}},
+      {x: 125, y: -87.5, opts: {stroke: 40}},
+      {x: 62.5, y: -175, opts: {stroke: 40}},
+      {x: -125, y: -175, opts: {stroke: 40}}
+    ];
+
+    // C
+    var path: PathPoint[] = [
+      {x: 105, y: -107.5, opts: {stroke: 40}},
+      {x: 62.5, y: -175, opts: {stroke: 40}},
+      {x: -82.5, y: -175, opts: {stroke: 40}},
+      {x: -125, y: -87.5, opts: {stroke: 40}},
+      {x: -125, y: 87.5, opts: {stroke: 40}},
+      {x: -82.5, y: 175, opts: {stroke: 40}},
+      {x: 62.5, y: 175, opts: {stroke: 40}},
+      {x: 105, y: 107.5, opts: {stroke: 40}}
     ];
 
     // var path: PathPoint[] = [
@@ -156,7 +168,7 @@ export class AppComponent implements AfterViewInit {
       stroke: 0
     };
 
-    var updateFollow = this.followPath(movingPoint, this.scalePath(path, 1, 1), 1000);
+    var updateFollow = this.followPath(movingPoint, this.scalePath(path, 2, 2), 500);
 
     var pathUpdate = updateFollow(0);
 
@@ -167,7 +179,7 @@ export class AppComponent implements AfterViewInit {
       calcPoints = points.slice(0);
 
       if(pathUpdate) {
-        movingPoint.x = pathUpdate.x + this.app.renderer.width / 2 - 35;
+        movingPoint.x = pathUpdate.x + this.app.renderer.width / 2 ;
         movingPoint.y = pathUpdate.y + this.app.renderer.height / 2;
         movingPoint.stroke = pathUpdate.stroke;
         pathUpdate = updateFollow(tick/2);
