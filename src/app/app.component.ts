@@ -57,7 +57,7 @@ export class AppComponent implements AfterViewInit {
     var pmouseX = 0;
     var pmouseY = 0;
 
-    var number_of_particles = this.app.renderer instanceof PIXI.WebGLRenderer ? 7000 : 100;
+    var number_of_particles = this.app.renderer instanceof PIXI.WebGLRenderer ? 12000 : 100;
     var particlesContainer = new PIXI.particles.ParticleContainer(number_of_particles, {
       scale: true,
       position: true,
@@ -85,8 +85,21 @@ export class AppComponent implements AfterViewInit {
     container.addChild(particlesContainer);
 
     var particles = [];
-    var tmp = Array(number_of_particles).fill(0);
-    var points = Array(number_of_particles<<1).fill(0);
+
+    var side1 = 7;
+    var side2 = 10.5;
+    var varX = 5;
+    var varY = -5;
+
+    var graphics = new PIXI.Graphics();
+    graphics.beginFill(0xffffff, 0.4);
+    graphics.moveTo(0, 0);
+    graphics.lineTo(-varX, side1);
+    graphics.lineTo(side2 + varX, side1 - varY);
+    graphics.closePath();
+    graphics.endFill();
+
+    let texture = this.app.renderer.generateTexture(graphics, PIXI.settings.SCALE_MODE, 16/9);
 
     for(var i = 0; i < number_of_particles; ++i) {
       var x = Math.random() * this.app.renderer.width;
@@ -96,25 +109,9 @@ export class AppComponent implements AfterViewInit {
       // var side2 = Math.max(10, Math.random() * 20);
       // var varX = Math.random() * 15;
       // var varY = Math.random() * 15;
-      var side1 = 7;
-      var side2 = 10.5;
-      var varX = 5;
-      var varY = -5;
-
-      var graphics = new PIXI.Graphics();
-      graphics.beginFill(0xffffff);
-      graphics.moveTo(x, y);
-      graphics.lineTo(x - varX, y + side1);
-      graphics.lineTo(x + side2 + varX, y + side1 - varY);
-      graphics.closePath();
-      graphics.endFill();
-
-      let texture = this.app.renderer.generateTexture(graphics, PIXI.settings.SCALE_MODE, 16/9);
 
       var particle = new PIXI.Sprite(texture);
       // var particle = new PIXI.Sprite.fromImage('../assets/bunny.png');
-      points[ i << 1     ] = x;
-      points[(i << 1) + 1] = y;
       particle.x = x;
       particle.y = y;
       particle.velX = 0;
@@ -124,41 +121,103 @@ export class AppComponent implements AfterViewInit {
       particlesContainer.addChild(particle);
     }
 
-    console.log(points.length, particlesContainer.filters);
+    // C
+    var path_c: PathPoint[] = [
+      {x: 105, y: -107.5, opts: {stroke: 32.5}},
+      {x: 62.5, y: -175, opts: {stroke: 32.5}},
+      {x: -82.5, y: -175, opts: {stroke: 32.5}},
+      {x: -125, y: -87.5, opts: {stroke: 32.5}},
+      {x: -125, y: 87.5, opts: {stroke: 32.5}},
+      {x: -82.5, y: 175, opts: {stroke: 32.5}},
+      {x: 62.5, y: 175, opts: {stroke: 32.5}},
+      {x: 105, y: 107.5, opts: {stroke: 32.5}}
+    ];
+
+    // A
+    var path_a: PathPoint[] = [
+      // top
+      {x: -20, y: -100, opts: {stroke: 32.5}},
+      // to bottom leg
+      {x: -75, y: 100, opts: {stroke: 32.5}},
+      // to top
+      {x: -20, y: -100, opts: {stroke: 32.5}},
+      {x: 20, y: -100, opts: {stroke: 32.5}},
+      //to mid
+      {x: 47.5, y: 0, opts: {stroke: 32.5}},
+      // across mid
+      {x: -47.5, y: 0, opts: {stroke: 32.5}},
+      {x: 47.5, y: 0, opts: {stroke: 32.5}},
+      // to bottom leg
+      {x: 75, y: 100, opts: {stroke: 32.5}},
+    ];
+
+    // N
+    var path_n: PathPoint[] = [
+      // bottom right side
+      {x: -50, y: 100, opts: {stroke: 32.5}},
+      // to top right side
+      {x: -50, y: -100, opts: {stroke: 32.5}},
+      // to bottom left side
+      {x: 50, y: 100, opts: {stroke: 32.5}},
+      // top top left side
+      {x: 50, y: -100, opts: {stroke: 32.5}}
+    ];
 
     // D
-    var path: PathPoint[] = [
-      {x: -125, y: -175, opts: {stroke: 40}},
-      {x: -125, y: 175, opts: {stroke: 40}},
-      {x: 62.5, y: 175, opts: {stroke: 40}},
-      {x: 125, y: 87.5, opts: {stroke: 40}},
-      {x: 125, y: -87.5, opts: {stroke: 40}},
-      {x: 62.5, y: -175, opts: {stroke: 40}},
-      {x: -125, y: -175, opts: {stroke: 40}}
+    var path_d: PathPoint[] = [
+      {x: -125, y: -175, opts: {stroke: 32.5}},
+      {x: -125, y: 175, opts: {stroke: 32.5}},
+      {x: 62.5, y: 175, opts: {stroke: 32.5}},
+      {x: 125, y: 87.5, opts: {stroke: 32.5}},
+      {x: 125, y: -87.5, opts: {stroke: 32.5}},
+      {x: 62.5, y: -175, opts: {stroke: 32.5}},
+      {x: -125, y: -175, opts: {stroke: 32.5}}
     ];
 
-    // C
-    var path: PathPoint[] = [
-      {x: 105, y: -107.5, opts: {stroke: 40}},
-      {x: 62.5, y: -175, opts: {stroke: 40}},
-      {x: -82.5, y: -175, opts: {stroke: 40}},
-      {x: -125, y: -87.5, opts: {stroke: 40}},
-      {x: -125, y: 87.5, opts: {stroke: 40}},
-      {x: -82.5, y: 175, opts: {stroke: 40}},
-      {x: 62.5, y: 175, opts: {stroke: 40}},
-      {x: 105, y: 107.5, opts: {stroke: 40}}
+    // E
+    var path_e: PathPoint[] = [
+      // top rung
+      {x: 50, y: -100, opts: {stroke: 32.5}},
+      // to left
+      {x: -50, y: -100, opts: {stroke: 32.5}},
+      // to mid
+      {x: -50, y: 0, opts: {stroke: 32.5}},
+      // second rung
+      {x: 50, y: 0, opts: {stroke: 32.5}},
+      // to mid
+      {x: -50, y: 0, opts: {stroke: 32.5}},
+      // to bottom
+      {x: -50, y: 100, opts: {stroke: 32.5}},
+      // third (bottom) rung
+      {x: 50, y: 100, opts: {stroke: 32.5}}
     ];
 
-    // var path: PathPoint[] = [
-    //   // center point
-    //   {x: 0, y: 0, opts: {stroke: 55, lerp: false}},
-    //   // top tendril
-    //   {x: 0, y: -275, opts: {stroke: 20, strokeLerp: true}},
-    //   {x: -65, y: -175, opts: {stroke: 50, strokeLerp: true}},
-    //   {x: -55, y: -125, opts: {stroke: 20, strokeLerp: true}}
-    // ];
+    // O
+    var path_o: PathPoint[] = [
+      // top rung
+      {x: 50, y: -100, opts: {stroke: 32.5}},
+      // to left
+      {x: -50, y: -100, opts: {stroke: 32.5}},
+      // to bottom
+      {x: -50, y: 100, opts: {stroke: 32.5}},
+      // third (bottom) rung
+      {x: 50, y: 100, opts: {stroke: 32.5}},
+      // to top rung
+      {x: 50, y: -100, opts: {stroke: 32.5}}
+    ];
 
-    
+    var candeo_map = [
+      path_c,
+      this.scalePath(path_a, 1.75, 1.75),
+      this.scalePath(path_n, 1.75, 1.75),
+      this.scalePath(path_d, 0.95, 1),
+      this.scalePath(path_e, 1.55, 1.75),
+      this.scalePath(path_o, 1.75, 1.75)
+    ];
+
+    var candeo_idx = 0;
+    var candeo_tick = 0;
+    var candeoProgress = 0;
 
     var calcPoints;
     var tick = 0;
@@ -168,21 +227,30 @@ export class AppComponent implements AfterViewInit {
       stroke: 0
     };
 
-    var updateFollow = this.followPath(movingPoint, this.scalePath(path, 2, 2), 500);
+    var followDuration = 5000;
+
+    var updateFollow = this.followPath(movingPoint, candeo_map[candeo_idx], followDuration);
 
     var pathUpdate = updateFollow(0);
 
     this.app.ticker.add((delta) => {
+      console.log("DELTA", delta);
+      candeo_tick += delta;
       tick += 0.01;
       // movingPoint.x = Math.cos(tick * 2) * 400 + this.app.renderer.width / 2 - 35;
       // movingPoint.y = Math.sin(tick * 2) * 400 + this.app.renderer.height / 2;
-      calcPoints = points.slice(0);
 
       if(pathUpdate) {
-        movingPoint.x = pathUpdate.x + this.app.renderer.width / 2 ;
+        movingPoint.x = pathUpdate.x + candeo_idx * 320 + 175;
         movingPoint.y = pathUpdate.y + this.app.renderer.height / 2;
         movingPoint.stroke = pathUpdate.stroke;
-        pathUpdate = updateFollow(tick/2);
+        candeoProgress = pathUpdate.progress;
+        if(candeoProgress >= 1 && candeo_idx < candeo_map.length - 1) {
+          candeo_idx++;
+          updateFollow = this.followPath(movingPoint, candeo_map[candeo_idx], followDuration);
+          candeo_tick = 0;
+        }
+        pathUpdate = updateFollow(candeo_tick/2);
       }
 
       for(var i = 0; i < number_of_particles; ++i) {
@@ -220,7 +288,7 @@ export class AppComponent implements AfterViewInit {
         };
 
         // distance past which the force is zero
-        var maxDistance = 20;
+        var maxDistance = 40;
         var force = (maxDistance - (distance)) / maxDistance;
 
         // if we went below zero, set it to zero.
@@ -236,8 +304,8 @@ export class AppComponent implements AfterViewInit {
         // var scale = (Math.max(0, Math.max(0.5, Math.cos(tick * 8)) * 2) * 50) + 25;
         var scale = 1;
 
-        particles[i].velX *= 0.97;
-        particles[i].velY *= 0.97;
+        particles[i].velX *= 0.95;
+        particles[i].velY *= 0.95;
 
         particles[i].velX += forceDirection.x * force * scale * delta;
         particles[i].velY += forceDirection.y * force * scale * delta;
@@ -290,6 +358,10 @@ export class AppComponent implements AfterViewInit {
     return path;
   }
 
+  pointEq(p1: {x: number, y: number}, p2: {x: number, y: number}) {
+    return p1.x === p2.x && p1.y === p2.y;
+  }
+
   followPath(point, path: PathPoint[], duration: number, close: boolean = false) {
     var default_ops: PathPointOpts = {
       stroke: 20,
@@ -338,7 +410,7 @@ export class AppComponent implements AfterViewInit {
       if(time > duration) {
         console.log('Done following path...');
         var idx = close || path.length === 1  ? 0 : path.length-1;
-        return {x: path[idx].x, y: path[idx].y, stroke: path[idx].opts.stroke};
+        return {x: path[idx].x, y: path[idx].y, stroke: path[idx].opts.stroke, progress: 1};
       }
 
       time += delta;
@@ -379,7 +451,8 @@ export class AppComponent implements AfterViewInit {
       return { 
         x: dx,
         y: dy,
-        stroke
+        stroke,
+        progress: time / duration
       };
     };
   }
